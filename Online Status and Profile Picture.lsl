@@ -6,7 +6,7 @@ list returns; // Global list variable
 vector vColour; // Global vector variable to store the colour of the displayed text
 float gap = 60.0; // Global float variable to store the refresh time
 string lastSeen; // Global string variable to store when the prim owner was last seen
-key request_id; //Global key variable
+key request_id; // Global key variable to store the UUI(D of the picture
 
 default
 {
@@ -28,35 +28,33 @@ default
 
     state_entry()
     {
-        ownerKey = llGetOwner();
-        ownerName = llKey2Name(ownerKey);
-        string texture = llGetInventoryName(INVENTORY_TEXTURE, 0);
+        ownerKey = llGetOwner(); // Get the prim owners name and save it to the variable
+        ownerName = llKey2Name(ownerKey); // Using the key obtained before, look up the owners name
+        string texture = llGetInventoryName(INVENTORY_TEXTURE, 0); // Set a local variable called texture, and get the name of a default texture
         // set it on all sides of the prim containing the script
         llSetTexture(texture, ALL_SIDES);
-        llSetText ("Waiting for update...",<1,1,0>,1);
-        llSetTimerEvent(gap);
+        llSetText ("Waiting for update...",<1,1,0>,1); // Set the hover text above the prim, set the colour to yellow and make it visible
+        llSetTimerEvent(gap); // Run a timer event for the amount sent in the global variable
     }
 
     timer()
-    {
-        onlineStatus = llRequestAgentData(ownerKey, DATA_ONLINE);
+    {        
+        onlineStatus = llRequestAgentData(ownerKey, DATA_ONLINE); // Make a call to the profile server to see if the person is online or not
         request_id = llHTTPRequest("http://profiles.osgrid.org/getprofilepicuuid/?uuid=" + (string)ownerKey + "&type=uuid", [HTTP_METHOD, "GET"], ""); // Here is where we get the actual pic from.
     }
    
     touch_start(integer num)
     {
+        // If the prim is touched, blank the texture and request a new version
         string texture = llGetInventoryName(INVENTORY_TEXTURE, 0);
         llSetTexture(texture, ALL_SIDES);
-        llSetText("Loading",<1,0,0>,1);
-        //request_id = llHTTPRequest("http://profileimg.inworldz.com/profileimg/?uid=" + (string)owner + "&type=uuid", [HTTP_METHOD, "GET"], "");
+        llSetText("Loading...",<1,0,0>,1); // Set the float text to red
         request_id = llHTTPRequest("http://profiles.osgrid.org/getprofilepicuuid/?uuid=" + (string)ownerKey + "&type=uuid", [HTTP_METHOD, "GET"], ""); // Here is where we get the actual pic from.
-        //request_id = llHTTPRequest("http://my.osgrid.org/picks.php?name=amber-marie.tracey", [HTTP_METHOD, "GET"], "");
-        //request_id = llHTTPRequest("http://my.osgrid.org/img/aab706f9-ee3d-49b1-a296-57d7ba4dfa46.jpg", [HTTP_METHOD, "GET"], "");
-        //request_id = llHTTPRequest("http://my.osgrid.org/picks.php?name=amber-marie.tracey", [HTTP_METHOD, "GET"], "");
     }
     
     http_response(key response_id, integer status, list metadata, string body)
     {
+        // Get the response to the web request and set the texture of the prim to the UID reported back
         if(response_id == request_id)
         {
             llSetTexture(body, ALL_SIDES);
