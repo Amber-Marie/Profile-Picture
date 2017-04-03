@@ -1,12 +1,12 @@
-key ownerKey;
-string ownerName;
-string onlineStatus;
-string statusTime;
-list returns;
-vector vColour;
-float gap = 60.0;
-string lastSeen;
-key request_id;
+key ownerKey; // Global key variable to store the prim owners key
+string ownerName; // Global string variable to store the prim owners name
+string onlineStatus; // Global string variable to store the owners online or offline status
+string statusTime; // Global string variable to store the last updated time
+list returns; // Global list variable
+vector vColour; // Global vector variable to store the colour of the displayed text
+float gap = 60.0; // Global float variable to store the refresh time
+string lastSeen; // Global string variable to store when the prim owner was last seen
+key request_id; //Global key variable
 
 default
 {
