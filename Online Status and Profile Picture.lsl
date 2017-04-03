@@ -1,12 +1,12 @@
-key ownerKey;
-string ownerName;
-string onlineStatus;
-string statusTime;
-list returns;
-vector vColour;
-float gap = 60.0;
-string lastSeen;
-key request_id;
+key ownerKey; // Global key variable to store the prim owners key
+string ownerName; // Global string variable to store the prim owners name
+string onlineStatus; // Global string variable to store the owners online or offline status
+string statusTime; // Global string variable to store the last updated time
+list returns; // Global list variable
+vector vColour; // Global vector variable to store the colour of the displayed text
+float gap = 60.0; // Global float variable to store the refresh time
+string lastSeen; // Global string variable to store when the prim owner was last seen
+key request_id; // Global key variable to store the UUI(D of the picture
 
 default
 {
@@ -28,35 +28,33 @@ default
 
     state_entry()
     {
-        ownerKey = llGetOwner();
-        ownerName = llKey2Name(ownerKey);
-        string texture = llGetInventoryName(INVENTORY_TEXTURE, 0);
+        ownerKey = llGetOwner(); // Get the prim owners name and save it to the variable
+        ownerName = llKey2Name(ownerKey); // Using the key obtained before, look up the owners name
+        string texture = llGetInventoryName(INVENTORY_TEXTURE, 0); // Set a local variable called texture, and get the name of a default texture
         // set it on all sides of the prim containing the script
         llSetTexture(texture, ALL_SIDES);
-        llSetText ("Waiting for update...",<1,1,0>,1);
-        llSetTimerEvent(gap);
+        llSetText ("Waiting for update...",<1,1,0>,1); // Set the hover text above the prim, set the colour to yellow and make it visible
+        llSetTimerEvent(gap); // Run a timer event for the amount sent in the global variable
     }
 
     timer()
-    {
-        onlineStatus = llRequestAgentData(ownerKey, DATA_ONLINE);
+    {        
+        onlineStatus = llRequestAgentData(ownerKey, DATA_ONLINE); // Make a call to the profile server to see if the person is online or not
         request_id = llHTTPRequest("http://profiles.osgrid.org/getprofilepicuuid/?uuid=" + (string)ownerKey + "&type=uuid", [HTTP_METHOD, "GET"], ""); // Here is where we get the actual pic from.
     }
    
     touch_start(integer num)
     {
+        // If the prim is touched, blank the texture and request a new version
         string texture = llGetInventoryName(INVENTORY_TEXTURE, 0);
         llSetTexture(texture, ALL_SIDES);
-        llSetText("Loading",<1,0,0>,1);
-        //request_id = llHTTPRequest("http://profileimg.inworldz.com/profileimg/?uid=" + (string)owner + "&type=uuid", [HTTP_METHOD, "GET"], "");
+        llSetText("Loading...",<1,0,0>,1); // Set the float text to red
         request_id = llHTTPRequest("http://profiles.osgrid.org/getprofilepicuuid/?uuid=" + (string)ownerKey + "&type=uuid", [HTTP_METHOD, "GET"], ""); // Here is where we get the actual pic from.
-        //request_id = llHTTPRequest("http://my.osgrid.org/picks.php?name=amber-marie.tracey", [HTTP_METHOD, "GET"], "");
-        //request_id = llHTTPRequest("http://my.osgrid.org/img/aab706f9-ee3d-49b1-a296-57d7ba4dfa46.jpg", [HTTP_METHOD, "GET"], "");
-        //request_id = llHTTPRequest("http://my.osgrid.org/picks.php?name=amber-marie.tracey", [HTTP_METHOD, "GET"], "");
     }
     
     http_response(key response_id, integer status, list metadata, string body)
     {
+        // Get the response to the web request and set the texture of the prim to the UID reported back
         if(response_id == request_id)
         {
             llSetTexture(body, ALL_SIDES);
@@ -66,18 +64,18 @@ default
     dataserver(key queryid, string data)
     {
         string timeLastseen;
-        if((integer)data == TRUE)
+        if((integer)data == TRUE) // If the prim owner is online, 
         {
-            string correctedHour;
-            string correctedMinute;
-            string indicator;
-            data = "Online";
-            vColour=<0.0, 1.0, 0.0>;
-            //float now = llGetWallclock();
-            float now = llGetGMTclock();
-            integer tmp = (integer)now / 60;
-            integer hour = tmp / 60;
-            integer minute = tmp - (hour * 60);
+            string correctedHour; // Local string variable to store hours
+            string correctedMinute; // Local string variable to store minutes
+            string indicator; // Local string variable to store 
+            data = "Online"; // Set the status to online
+            vColour=<0.0, 1.0, 0.0>; // Set the float text to green
+            float now = llGetGMTclock(); // Set the local float variable to the number of seconds since midnight in GMT
+            integer tmp = (integer)now / 60; // Set the local variable to the current seconds divided by 60 to give us minutes since midnight
+            integer hour = tmp / 60; // Set the local variable to the number of minutes divided by 60 to give us the hours since midnight
+            integer minute = tmp - (hour * 60); // Set the local variable to the number of hours multiplied by 60 minus the number of seconds to give us the minutes
+            // Correct the display to handle single numbers and add leading zeros where needed
             if ( hour < 10 )
             {
                 correctedHour = "0" + (string)hour;
@@ -94,6 +92,7 @@ default
             {
                 correctedMinute = (string)minute;
             }
+            // Add AM or PM depending upon the time given
             if ( hour < 12 )
             {
                 indicator = "am";
@@ -108,10 +107,11 @@ default
         }
         else
         {
-            data = "Offline";
-            vColour=<1.0, 0.0, 0.0>;
+            data = "Offline"; // Prim owner is offline
+            vColour=<1.0, 0.0, 0.0>; // Set the fload text to red
             timeLastseen = "\n Last seen at " + lastSeen + " GMT";
         }
+        // Report the owners status and the time that they were last seen
         float timeNow = llGetWallclock();
         integer nowTmp = (integer)timeNow / 60;
         integer nowHour = nowTmp / 60;
