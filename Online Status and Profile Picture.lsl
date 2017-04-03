@@ -64,18 +64,18 @@ default
     dataserver(key queryid, string data)
     {
         string timeLastseen;
-        if((integer)data == TRUE)
+        if((integer)data == TRUE) // If the prim owner is online, 
         {
-            string correctedHour;
-            string correctedMinute;
-            string indicator;
-            data = "Online";
-            vColour=<0.0, 1.0, 0.0>;
-            //float now = llGetWallclock();
-            float now = llGetGMTclock();
-            integer tmp = (integer)now / 60;
-            integer hour = tmp / 60;
-            integer minute = tmp - (hour * 60);
+            string correctedHour; // Local string variable to store hours
+            string correctedMinute; // Local string variable to store minutes
+            string indicator; // Local string variable to store 
+            data = "Online"; // Set the status to online
+            vColour=<0.0, 1.0, 0.0>; // Set the float text to green
+            float now = llGetGMTclock(); // Set the local float variable to the number of seconds since midnight in GMT
+            integer tmp = (integer)now / 60; // Set the local variable to the current seconds divided by 60 to give us minutes since midnight
+            integer hour = tmp / 60; // Set the local variable to the number of minutes divided by 60 to give us the hours since midnight
+            integer minute = tmp - (hour * 60); // Set the local variable to the number of hours multiplied by 60 minus the number of seconds to give us the minutes
+            // Correct the display to handle single numbers and add leading zeros where needed
             if ( hour < 10 )
             {
                 correctedHour = "0" + (string)hour;
@@ -92,6 +92,7 @@ default
             {
                 correctedMinute = (string)minute;
             }
+            // Add AM or PM depending upon the time given
             if ( hour < 12 )
             {
                 indicator = "am";
@@ -106,10 +107,11 @@ default
         }
         else
         {
-            data = "Offline";
-            vColour=<1.0, 0.0, 0.0>;
+            data = "Offline"; // Prim owner is offline
+            vColour=<1.0, 0.0, 0.0>; // Set the fload text to red
             timeLastseen = "\n Last seen at " + lastSeen + " GMT";
         }
+        // Report the owners status and the time that they were last seen
         float timeNow = llGetWallclock();
         integer nowTmp = (integer)timeNow / 60;
         integer nowHour = nowTmp / 60;
