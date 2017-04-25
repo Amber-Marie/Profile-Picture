@@ -1,7 +1,8 @@
-// Online status and Profile Picture V2
+// Online status and Profile Picture V3
 // Updated to use my.osgrid.org, code provided by Lotek Ixtar @ OSgrid (22 March 2017)
 // ©16 March 2017 by Amber-Marie Tracey @ OSgrid
-
+// Latest version at https://github.com/Amber-Marie/Profile-Picture
+//
 key ownerKey; // Global key variable to store the prim owners key
 string ownerName; // Global string variable to store the prim owners name
 string onlineStatus; // Global string variable to store the owners online or offline status
@@ -57,6 +58,8 @@ default
 
     timer()
     {        
+        ownerKey = llGetOwner(); // Get the prim owners name and save it to the variable
+        ownerName = llKey2Name(ownerKey); // Using the key obtained before, look up the owners name
         onlineStatus = llRequestAgentData(ownerKey, DATA_ONLINE); // Make a call to the profile server to see if the person is online or not
         request_id = llHTTPRequest("http://profiles.osgrid.org/getprofilepicuuid/?uuid=" + (string)ownerKey + "&type=uuid", [HTTP_METHOD, "GET"], ""); // Here is where we get the actual pic from.
         FetchProfilePic(ownerName);
@@ -64,10 +67,12 @@ default
    
     touch_start(integer num)
     {
+        ownerKey = llGetOwner(); // Get the prim owners name and save it to the variable
+        ownerName = llKey2Name(ownerKey); // Using the key obtained before, look up the owners name
         // If the prim is touched, blank the texture and request a new version
         llSetPrimitiveParams([ PRIM_TEXTURE, ALL_SIDES, TEXTURE_TRANSPARENT, <0.0, 0.0, 0.0>, <0.0, 0.0, 0.0>, 0.0 ]); // Make all sides transparent
         llSetText("Loading...",<1,0,0>,1); // Set the float text to red
-        FetchProfilePic(llDetectedName(0));
+        FetchProfilePic(ownerName);
         }
     
     http_response(key request_id,integer status, list metadata, string body)
